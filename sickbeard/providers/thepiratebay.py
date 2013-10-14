@@ -122,7 +122,11 @@ class ThePirateBayProvider(generic.TorrentProvider):
             logger.log(u"Unable to get the torrent file list for "+title, logger.ERROR)
             
         for fileName in filter(lambda x: x.rpartition(".")[2].lower() in mediaExtensions, filesList):
-            quality = Quality.nameQuality(os.path.basename(fileName), show.anime)
+            if show != None:
+                anime = show.anime
+            else:
+                anime = False
+            quality = Quality.nameQuality(os.path.basename(fileName), anime)
             if quality != Quality.UNKNOWN: break
 
         if fileName!=None and quality == Quality.UNKNOWN:
@@ -242,7 +246,11 @@ class ThePirateBayProvider(generic.TorrentProvider):
                         continue
 
                     #Try to find the real Quality for full season torrent analyzing files in torrent 
-                    if mode == 'Season' and Quality.nameQuality(title, show.anime) == Quality.UNKNOWN:     
+                    if show != None:
+                        anime = show.anime
+                    else:
+                        anime = False
+                    if mode == 'Season' and Quality.nameQuality(title, anime) == Quality.UNKNOWN:     
                         if not self._find_season_quality(title,id,show):
                             continue
                         
