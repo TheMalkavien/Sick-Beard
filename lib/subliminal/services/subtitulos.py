@@ -53,6 +53,8 @@ class Subtitulos(ServiceBase):
 
     def query(self, filepath, languages, keywords, series, season, episode):
         request_series = series.lower().replace(' ', '-').replace('&', '@').replace('(','').replace(')','')
+        if request_series == "marvel's-agents-of-s-h-i-e-l-d":
+            request_series = "marvel's-agents-of-s.h.i.e.l.d."
         if isinstance(request_series, unicode):
             request_series = unicodedata.normalize('NFKD', request_series).encode('ascii', 'ignore')
         logger.debug(u'Getting subtitles for %s season %d episode %d with languages %r' % (series, season, episode, languages))
