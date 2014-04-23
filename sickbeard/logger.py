@@ -89,8 +89,8 @@ class SBRotatingLogHandler(object):
             logging.getLogger('subliminal').addHandler(console)
             logging.getLogger('imdbpy').addHandler(console)
     
-        logging.getLogger('sickbeard').setLevel(DB)
-        logging.getLogger('subliminal').setLevel(logging.ERROR)
+        logging.getLogger('sickbeard').setLevel(logging.DEBUG)
+        logging.getLogger('subliminal').setLevel(logging.DEBUG)
         logging.getLogger('imdbpy').setLevel(logging.WARNING)
 
     def _config_handler(self):
