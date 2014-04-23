@@ -1498,7 +1498,9 @@ class ConfigNotifications:
                           use_synologynotifier=None, synologynotifier_notify_onsnatch=None, synologynotifier_notify_ondownload=None, synologynotifier_notify_onsubtitledownload=None,
                           use_pytivo=None, pytivo_notify_onsnatch=None, pytivo_notify_ondownload=None, pytivo_notify_onsubtitledownload=None, pytivo_update_library=None, 
                           pytivo_host=None, pytivo_share_name=None, pytivo_tivo_name=None,
-                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_notify_onsubtitledownload=None, nma_api=None, nma_priority=0 ):
+                          use_nma=None, nma_notify_onsnatch=None, nma_notify_ondownload=None, nma_notify_onsubtitledownload=None, nma_api=None, nma_priority=0,
+						  use_email=None, email_notify_onsnatch=None, email_notify_ondownload=None, email_notify_onsubtitledownload=None, email_host=None, email_port=25, email_from=None,
+                          email_tls=None, email_user=None, email_password=None, email_list=None, email_show_list=None, email_show=None ):
 
         results = []
 
@@ -1782,6 +1784,31 @@ class ConfigNotifications:
         else:
             nma_notify_onsubtitledownload = 0
 
+        if use_email == "on":
+            use_email = 1
+        else:
+            use_email = 0
+
+        if email_notify_onsnatch == "on":
+            email_notify_onsnatch = 1
+        else:
+            email_notify_onsnatch = 0
+
+        if email_notify_ondownload == "on":
+            email_notify_ondownload = 1
+        else:
+            email_notify_ondownload = 0
+
+        if email_notify_onsubtitledownload == "on":
+            email_notify_onsubtitledownload = 1
+        else:
+            email_notify_onsubtitledownload = 0
+
+        if email_tls == "on":
+            email_tls = 1
+        else:
+            email_tls = 0
+		
         sickbeard.USE_XBMC = use_xbmc
         sickbeard.XBMC_NOTIFY_ONSNATCH = xbmc_notify_onsnatch
         sickbeard.XBMC_NOTIFY_ONDOWNLOAD = xbmc_notify_ondownload
@@ -1887,7 +1914,19 @@ class ConfigNotifications:
         sickbeard.NMA_NOTIFY_ONSUBTITLEDOWNLOAD = nma_notify_onsubtitledownload
         sickbeard.NMA_API = nma_api
         sickbeard.NMA_PRIORITY = nma_priority
-        
+
+        sickbeard.USE_EMAIL = use_email
+        sickbeard.EMAIL_NOTIFY_ONSNATCH = email_notify_onsnatch
+        sickbeard.EMAIL_NOTIFY_ONDOWNLOAD = email_notify_ondownload
+        sickbeard.EMAIL_NOTIFY_ONSUBTITLEDOWNLOAD = email_notify_onsubtitledownload
+        sickbeard.EMAIL_HOST = email_host
+        sickbeard.EMAIL_PORT = email_port
+        sickbeard.EMAIL_FROM = email_from
+        sickbeard.EMAIL_TLS = email_tls
+        sickbeard.EMAIL_USER = email_user
+        sickbeard.EMAIL_PASSWORD = email_password
+        sickbeard.EMAIL_LIST = email_list
+		
         sickbeard.save_config()
 
         if len(results) > 0:
@@ -2788,6 +2827,16 @@ class Home:
         else:
             return "Test notice failed to Trakt"
 
+    @cherrypy.expose
+    def testEmail(self, host=None, port=None, smtp_from=None, use_tls=None, user=None, pwd=None, to=None):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        host = host
+        if notifiers.email_notifier.test_notify(host, port, smtp_from, use_tls, user, pwd, to):
+            return 'Test email sent successfully! Check inbox.'
+        else:
+            return 'ERROR: %s' % notifiers.email_notifier.last_err
+			
     @cherrypy.expose
     def testNMA(self, nma_api=None, nma_priority=0):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
