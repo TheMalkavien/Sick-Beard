@@ -1,4 +1,4 @@
-SICKBEARD_TEAM = "Pistachitos"
+SICKBEARD_TEAM = "TheMalkavien"
 SICKBEARD_VERSION = "Pistachitos"
 
 # If Team and Version are different then is "Team Version", else "Version"
