@@ -2828,6 +2828,20 @@ class Home:
             return "Test notice failed to Trakt"
 
     @cherrypy.expose
+    def loadShowNotifyLists(self):
+        cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
+
+        mydb = db.DBConnection()
+        rows = mydb.select("SELECT show_id, show_name, notify_list FROM tv_shows")
+        data = {}
+        size = 0
+        for r in rows:
+            data[r['show_id']] = {'id': r['show_id'], 'name': r['show_name'], 'list': r['notify_list']}
+            size += 1
+        data['_size'] = size
+        return json.dumps(data)
+		
+    @cherrypy.expose
     def testEmail(self, host=None, port=None, smtp_from=None, use_tls=None, user=None, pwd=None, to=None):
         cherrypy.response.headers['Cache-Control'] = "max-age=0,no-cache,no-store"
 

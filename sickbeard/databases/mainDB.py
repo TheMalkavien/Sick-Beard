@@ -98,14 +98,14 @@ class InitialSchema (db.SchemaUpgrade):
 
     def execute(self):
         queries = [
-            "CREATE TABLE tv_shows (show_id INTEGER PRIMARY KEY, location TEXT, show_name TEXT, tvdb_id NUMERIC, network TEXT, genre TEXT, runtime NUMERIC, quality NUMERIC, airs TEXT, status TEXT, seasonfolders NUMERIC, paused NUMERIC, startyear NUMERIC);",
+            "CREATE TABLE tv_shows (show_id INTEGER PRIMARY KEY, location TEXT, show_name TEXT, tvdb_id NUMERIC, network TEXT, genre TEXT, runtime NUMERIC, quality NUMERIC, airs TEXT, status TEXT, seasonfolders NUMERIC, paused NUMERIC, startyear NUMERIC, notify_list TEXT);",
             "CREATE TABLE tv_episodes (episode_id INTEGER PRIMARY KEY, showid NUMERIC, tvdbid NUMERIC, name TEXT, season NUMERIC, episode NUMERIC, description TEXT, airdate NUMERIC, hasnfo NUMERIC, hastbn NUMERIC, status NUMERIC, location TEXT);",
             "CREATE TABLE info (last_backlog NUMERIC, last_tvdb NUMERIC);",
             "CREATE TABLE history (action NUMERIC, date NUMERIC, showid NUMERIC, season NUMERIC, episode NUMERIC, quality NUMERIC, resource TEXT, provider NUMERIC);"
         ]
         for query in queries:
             self.connection.action(query)
-
+			
 class AddTvrId (InitialSchema):
     def test(self):
         return self.hasColumn("tv_shows", "tvr_id")
@@ -699,3 +699,18 @@ class AddAnimeSupport(Add1080pAndRawHDQualities):
         
         self.incDBVersion()
 
+class AddProperNamingSupport(Add1080pAndRawHDQualities):
+    def test(self):
+        return self.checkDBVersion() >= 15
+
+    def execute(self):
+        self.addColumn("tv_episodes", "is_proper")
+        self.incDBVersion()
+			
+class AddEmailSubscriptionTable(AddProperNamingSupport):
+    def test(self):
+        return self.hasColumn("tv_shows", "notify_list")
+
+    def execute(self):
+        self.addColumn('tv_shows', 'notify_list', 'TEXT', None)
+        self.incDBVersion()
