@@ -21,6 +21,7 @@
 import datetime
 import os
 import re
+import xml.dom.minidom
 
 import sickbeard
 
@@ -197,20 +198,39 @@ class GenericProvider:
     
     def _get_title_and_url(self, item):
         """
-        Retrieves the title and URL data from the item XML node
+        Retrieves the title and URL data from the item XML node.
 
-        item: An xml.dom.minidom.Node representing the <item> tag of the RSS feed
+        Some Einstein decided to change `item` from a xml.dom.minidom.Node to
+        an elementtree.ElementTree element upstream, without taking into
+        account that this is the base for *LOTS* of classes, so it will
+        basically break every one of them unless they are all changed.
+        Why does python even allow this crap?  Strong typing is a good thing
+        for a language Guido!
 
-        Returns: A tuple containing two strings representing title and URL respectively
+        (so, rant over, we now need to cater for both cases here)
+
+        @param item: An xml.dom.minidom.Node (or an elementtree.ElementTree
+                element) representing the <item> tag of the RSS feed.
+        @return: A tuple containing two strings representing title and URL
+                respectively.
         """
-        title = helpers.get_xml_text(item.getElementsByTagName('title')[0])
-        try:
-            url = helpers.get_xml_text(item.getElementsByTagName('link')[0])
+        if isinstance(item, xml.dom.minidom.Node):
+            title = helpers.get_xml_text(item.getElementsByTagName('title')[0], mini_dom=True)
+            try:
+                url = helpers.get_xml_text(item.getElementsByTagName('link')[0], mini_dom=True)
+                if url:
+                    url = url.replace('&amp;', '&')
+            except IndexError:
+                url = None
+        else:
+            title = helpers.get_xml_text(item.find('title'))
+            if title:
+                title = title.replace(' ', '.')
+
+            url = helpers.get_xml_text(item.find('link'))
             if url:
-                url = url.replace('&amp;','&')
-        except IndexError:
-            url = None
-        
+                url = url.replace('&amp;', '&')
+
         return (title, url)
     
     def findEpisode (self, episode, manualSearch=False):

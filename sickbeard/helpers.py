@@ -758,6 +758,44 @@ if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
+def parse_json(data):
+    """
+    Parse json data into a python object
+
+    data: data string containing json
+
+    Returns: parsed data as json or None
+    """
+
+    try:
+        parsedJSON = json.loads(data)
+    except ValueError:
+        logger.log(u"Error trying to decode json data:" + data, logger.ERROR)
+        return None
+
+    return parsedJSON
+	
+def parse_xml(data, del_xmlns=False):
+    """
+    Parse data into an xml elementtree.ElementTree
+
+    data: data string containing xml
+    del_xmlns: if True, removes xmlns namesspace from data before parsing
+
+    Returns: parsed data as elementtree or None
+    """
+
+    if del_xmlns:
+        data = re.sub(' xmlns="[^"]+"', '', data)
+
+    try:
+        parsedXML = etree.fromstring(data)
+    except Exception, e:
+        logger.log(u"Error trying to parse xml data: " + data + " to Elementtree, Error: " + ex(e), logger.DEBUG)
+        parsedXML = None
+
+    return parsedXML	
+	
 def get_xml_text(element, mini_dom=False):
     """
     Get all text inside a xml element

@@ -96,36 +96,42 @@ class TVCache():
         if not self.shouldUpdate():
             return
 
-        data = self._getRSSData()
+        if self._checkAuth(None):
 
-        # as long as the http request worked we count this as an update
-        if data:
-            self.setLastUpdate()
-        else:
-            return []
+            data = self._getRSSData()
 
-        # now that we've loaded the current RSS feed lets delete the old cache
-        logger.log(u"Clearing "+self.provider.name+" cache and updating with new information")
-        self._clearCache()
+            # as long as the http request worked we count this as an update
+            if data:
+                self.setLastUpdate()
+            else:
+                return []
 
-        if not self._checkAuth(data):
-            raise exceptions.AuthException("Your authentication info for "+self.provider.name+" is incorrect, check your config")
+            # now that we've loaded the current RSS feed lets delete the old cache
+            logger.log(u"Clearing " + self.provider.name + " cache and updating with new information")
+            self._clearCache()
 
-        try:
-            parsedXML = xml.dom.minidom.parseString(data)
-            items = parsedXML.getElementsByTagName('item')
-        except Exception, e:
-            logger.log(u"Error trying to load "+self.provider.name+" RSS feed: "+ex(e), logger.ERROR)
-            logger.log(u"Feed contents: "+repr(data), logger.DEBUG)
-            return []
+            parsedXML = helpers.parse_xml(data)
 
-        if parsedXML.documentElement.tagName != 'rss':
-            logger.log(u"Resulting XML from "+self.provider.name+" isn't RSS, not parsing it", logger.ERROR)
-            return []
+            if parsedXML is None:
+                logger.log(u"Error trying to load " + self.provider.name + " RSS feed", logger.ERROR)
+                return []
 
-        for item in items:
+            if self._checkAuth(parsedXML):
 
-            self._parseItem(item)
+                if parsedXML.tag == 'rss':
+                    items = parsedXML.findall('.//item')
+
+                else:
+                    logger.log(u"Resulting XML from " + self.provider.name + " isn't RSS, not parsing it", logger.ERROR)
+                    return []
+
+                for item in items:
+                    self._parseItem(item)
+
+            else:
+                raise AuthException(u"Your authentication credentials for " + self.provider.name + " are incorrect, check your config")
+
+        return []
 
     def _translateLinkURL(self, url):
         return url.replace('&amp;','&')
