@@ -127,7 +127,7 @@ def sanitizeFileName (name):
     return name
 
 
-def getURL (url, headers=[]):
+def getURL(url, headers=[], timeout=None):
     """
     Returns a byte-string retrieved from the url provider.
     """
@@ -138,7 +138,11 @@ def getURL (url, headers=[]):
         opener.addheaders.append(cur_header)
 
     try:
-        usock = opener.open(url)
+        if sys.version_info < (2, 6) or timeout is None:
+            usock = opener.open(url)
+        else:
+            usock = opener.open(url, timeout=timeout)
+        
         url = usock.geturl()
         encoding = usock.info().get("Content-Encoding")
 
@@ -158,18 +162,23 @@ def getURL (url, headers=[]):
     except urllib2.HTTPError, e:
         logger.log(u"HTTP error " + str(e.code) + " while loading URL " + url, logger.WARNING)
         return None
+
     except urllib2.URLError, e:
         logger.log(u"URL error " + str(e.reason) + " while loading URL " + url, logger.WARNING)
         return None
+
     except BadStatusLine:
         logger.log(u"BadStatusLine error while loading URL " + url, logger.WARNING)
         return None
+
     except socket.timeout:
         logger.log(u"Timed out while loading URL " + url, logger.WARNING)
         return None
+
     except ValueError:
         logger.log(u"Unknown error while loading URL " + url, logger.WARNING)
         return None
+
     except Exception:
         logger.log(u"Unknown exception while loading URL " + url + ": " + traceback.format_exc(), logger.WARNING)
         return None
@@ -749,11 +758,29 @@ if __name__ == '__main__':
     import doctest
     doctest.testmod()
 
-def get_xml_text(node):
+def get_xml_text(element, mini_dom=False):
+    """
+    Get all text inside a xml element
+
+    element: A xml element either created with elementtree.ElementTree or xml.dom.minidom
+    mini_dom: Default False use elementtree, True use minidom
+
+    Returns: text
+    """
+
     text = ""
-    for child_node in node.childNodes:
-        if child_node.nodeType in (Node.CDATA_SECTION_NODE, Node.TEXT_NODE):
-            text += child_node.data
+
+    if mini_dom:
+        node = element
+        for child in node.childNodes:
+            if child.nodeType in (Node.CDATA_SECTION_NODE, Node.TEXT_NODE):
+                text += child.data
+    else:
+        if element is not None:
+            for child in [element] + element.findall('.//*'):
+                if child.text:
+                    text += child.text
+
     return text.strip()
 
 def backupVersionedFile(oldFile, version):
