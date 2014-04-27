@@ -36,11 +36,11 @@ class DownloadStationAPI(GenericClient):
                   'method': 'login',
                   'account': self.username,
                   'passwd': self.password,
-                  'session': 'DownloadStation',
+                  'session': 'SickBeard',
                   'format': 'sid',
                   }
 
-        self.response = self.session.get(self.host + 'auth.cgi', params=params)
+        self.response = self.session.get(self.host + 'webapi/auth.cgi', params=params)
         
         if not self.response.json["success"]:
             return None
@@ -56,10 +56,9 @@ class DownloadStationAPI(GenericClient):
                   'method': 'create',
                   '_sid': self.auth,
                   'uri': result.url,
-                  'session': 'DownloadStation',
                   }
         
-        self._request(method='post', params=params)
+        self._request(method='get', params=params)
         
         return self.response.json["success"]
             
@@ -70,10 +69,9 @@ class DownloadStationAPI(GenericClient):
                   'method': 'create',
                   '_sid': self.auth,
                   'file': 'tv.torrent',
-                  'session': 'DownloadStation',
                   }
         
-        self._request(method='post', params=params, files={'file': result.content})
+        self._request(method='get', params=params, files={'file': result.content})
     
         return self.response.json["success"]
     
