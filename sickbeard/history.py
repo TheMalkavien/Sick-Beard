@@ -74,7 +74,7 @@ def logDownload(episode, filename, new_ep_quality, release_group=None):
 
 def logSubtitle(showid, season, episode, status, subtitleResult):
     
-    resource = subtitleResult.release if subtitleResult.release else '' 
+    resource = subtitleResult.language.alpha2 if subtitleResult.language.alpha2 else '' 
     provider = subtitleResult.service
     status, quality  = Quality.splitCompositeStatus(status) 
     action = Quality.compositeStatus(SUBTITLED, quality)
