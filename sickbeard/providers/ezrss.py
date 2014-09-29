@@ -46,11 +46,11 @@ class EZRSSProvider(generic.TorrentProvider):
 
         self.cache = EZRSSCache(self)
 
-        self.url = 'https://www.ezrss.it/'
+        self.url = 'http://www.ezrss.it/'
         
         # These are backup feeds, tried in order if the main feed fails.
         # (these just provide "latest", no backlog)
-        self.backup_feeds = ['https://rss.thepiratebay.sx/user/d17c6a45441ce0bc0c057f19057f95e1',
+        self.backup_feeds = ['http://rss.thepiratebay.se/user/d17c6a45441ce0bc0c057f19057f95e1',
                              'http://feeds.feedburner.com/eztv-rss-atom-feeds?format=xml&max-results=30',
                              'http://www.ezrss.it.nyud.net/feed/',
                              'http://show-api.tvtumbler.com/api/ezrss-mirror',

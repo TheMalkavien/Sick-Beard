@@ -308,7 +308,7 @@ class TVShow(object):
                     try:
                         curEpisode.refreshSubtitles()
                     except:
-                        logger.log(str(self.tvdbid) + ": Could not refresh subtitles", logger.ERROR)
+                        logger.log(str(self.tvdbid) + ": Could not refresh subtitles for " + ep_file_name, logger.ERROR)
                         logger.log(traceback.format_exc(), logger.DEBUG)
                 curEpisode.saveToDB()
                 
@@ -1839,7 +1839,9 @@ class TVEpisode(object):
             season_name = self.show.seasons_name[self.season]
         except:
             season_name = "" 
-        
+        logger.log("absolute number : "+str(self.absolute_number), logger.DEBUG)
+        if self.absolute_number == None:
+            self.absolute_number = 0
         return {
                    '%SN': show_name,
                    '%S.N': dot(show_name),
